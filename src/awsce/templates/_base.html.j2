@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="generator" content="awsce {{ version }}">
+  <title>{% block title %}{% endblock %}</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
+          integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ"
+          crossorigin="anonymous"></script>
+  <style>
+    :root { --ink:#1b1b1b; --muted:#5f6368; --line:#e3e3e3; --bg:#f7f6f2; --card:#fff; --accent:#b8902b; }
+    * { box-sizing: border-box; }
+    body { margin:0; font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--ink); background:var(--bg); }
+    header { display:flex; align-items:center; gap:16px; padding:24px 32px; background:#141414; color:#fff; }
+    header img { width:52px; height:52px; }
+    header h1 { margin:0; font-size:1.4rem; }
+    header p { margin:2px 0 0; color:#cfcfcf; font-size:.9rem; }
+    main { max-width:1200px; margin:0 auto; padding:24px 32px 48px; }
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:24px; }
+    .card, section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 20px; }
+    .card .label { color:var(--muted); font-size:.85rem; }
+    .card .value { font-size:1.6rem; font-weight:600; }
+    section { margin-bottom:24px; }
+    h2 { margin:0 0 12px; font-size:1.1rem; }
+    table { width:100%; border-collapse:collapse; font-size:.9rem; }
+    th, td { text-align:left; padding:7px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+    th { color:var(--muted); font-weight:600; }
+    td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    tr.group td { background:#faf7ee; font-weight:600; }
+    .chart { position:relative; height:300px; }
+    .charts { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:24px; }
+    footer { color:var(--muted); font-size:.8rem; text-align:center; padding:16px; }
+    @media print { header { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="data:image/svg+xml;base64,{{ logo }}" alt="">
+    <div>
+      <h1>{{ self.title() }}</h1>
+      <p>{{ start }} to {{ end }} (end date not included) · generated {{ generated }}</p>
+    </div>
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+  <footer>Made with <a href="https://github.com/hoangbeard/awsce">awsce</a> {{ version }}. Amounts are unblended costs in USD.</footer>
+  <script>
+  {
+    Chart.defaults.maintainAspectRatio = false;
+    const palette = ["#b8902b","#2f4858","#86bbd8","#f26419","#33658a","#7e9c4a","#9c6644","#5c4d7d","#d1495b","#00798c"];
+    {% block script %}{% endblock %}
+  }
+  </script>
+</body>
+</html>

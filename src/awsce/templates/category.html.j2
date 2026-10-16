@@ -1,0 +1,37 @@
+{% extends "_base.html.j2" %}
+{% block title %}Cost category report: {{ report.category }}{% endblock %}
+{% block content %}
+<div class="cards">
+  <div class="card"><div class="label">Total cost</div><div class="value">{{ money(report.total) }}</div></div>
+  <div class="card"><div class="label">Values</div><div class="value">{{ report["values"]|length }}</div></div>
+  <div class="card"><div class="label">Account</div><div class="value" style="font-size:1.1rem">{{ report.account_id }}</div></div>
+</div>
+
+<section class="charts">
+  <div><h2>Cost by value</h2><div class="chart"><canvas id="values"></canvas></div></div>
+</section>
+
+<section>
+  <h2>Values and services</h2>
+  <table>
+    <thead><tr><th>Value / service</th><th>First seen</th><th class="num">Cost</th><th class="num">Share</th></tr></thead>
+    <tbody>
+    {% for v in report["values"] %}
+      <tr class="group"><td>{{ v.value }}</td><td>{{ report.first_seen.get(v.value, "") }}</td>
+          <td class="num">{{ money(v.total) }}</td><td class="num">{{ pct(v.total, report.total) }}</td></tr>
+      {% for s in v.services %}
+      <tr><td>&nbsp;&nbsp;{{ s.service }}</td><td></td><td class="num">{{ money(s.cost) }}</td>
+          <td class="num">{{ pct(s.cost, v.total) }}</td></tr>
+      {% endfor %}
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
+{% block script %}
+const valueTotals = {{ value_totals|tojson }};
+new Chart(document.getElementById("values"), {
+  type: "doughnut",
+  data: { labels: valueTotals.map(v => v[0]), datasets: [{ data: valueTotals.map(v => v[1]), backgroundColor: palette }] }
+});
+{% endblock %}

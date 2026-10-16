@@ -1,0 +1,67 @@
+{% extends "_base.html.j2" %}
+{% block title %}AWS cost report{% endblock %}
+{% block content %}
+<div class="cards">
+  <div class="card"><div class="label">Total cost</div><div class="value">{{ money(total) }}</div></div>
+  <div class="card"><div class="label">Accounts</div><div class="value">{{ accounts|length }}</div></div>
+  <div class="card"><div class="label">Services</div><div class="value">{{ services|length }}</div></div>
+</div>
+
+<section class="charts">
+  <div><h2>Top services</h2><div class="chart"><canvas id="services"></canvas></div></div>
+  {% if accounts|length > 1 %}<div><h2>Cost by account</h2><div class="chart"><canvas id="accounts"></canvas></div></div>{% endif %}
+  {% if months|length > 1 %}<div><h2>Cost by month</h2><div class="chart"><canvas id="months"></canvas></div></div>{% endif %}
+</section>
+
+<section>
+  <h2>Accounts</h2>
+  <table>
+    <thead><tr><th>Profile</th><th>Account</th><th class="num">Cost</th><th class="num">Share</th></tr></thead>
+    <tbody>
+    {% for a in accounts %}
+      <tr><td>{{ a.profile }}</td><td>{{ a.account_id }}</td><td class="num">{{ money(a.total) }}</td>
+          <td class="num">{{ pct(a.total, total) }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Services and usage types</h2>
+  <table>
+    <thead><tr><th>Service / usage type</th><th class="num">Usage</th><th class="num">Cost</th></tr></thead>
+    <tbody>
+    {% for s in services %}
+      <tr class="group"><td>{{ s.service }}</td><td></td><td class="num">{{ money(s.total) }}</td></tr>
+      {% for u in s.usage_types %}
+      <tr><td>&nbsp;&nbsp;{{ u.usage_type }}{% if u.account_count > 1 %} · {{ u.account_count }} accounts{% endif %}</td>
+          <td class="num">{{ qty(u.quantity, u.unit) }}</td><td class="num">{{ money(u.cost) }}</td></tr>
+      {% endfor %}
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
+{% block script %}
+const topServices = {{ top_services|tojson }};
+new Chart(document.getElementById("services"), {
+  type: "bar",
+  data: { labels: topServices.map(s => s[0]), datasets: [{ data: topServices.map(s => s[1]), backgroundColor: palette[0] }] },
+  options: { indexAxis: "y", plugins: { legend: { display: false } } }
+});
+{% if accounts|length > 1 %}
+const accountTotals = {{ account_totals|tojson }};
+new Chart(document.getElementById("accounts"), {
+  type: "doughnut",
+  data: { labels: accountTotals.map(a => a[0]), datasets: [{ data: accountTotals.map(a => a[1]), backgroundColor: palette }] }
+});
+{% endif %}
+{% if months|length > 1 %}
+const monthTotals = {{ months|tojson }};
+new Chart(document.getElementById("months"), {
+  type: "line",
+  data: { labels: monthTotals.map(m => m[0]), datasets: [{ data: monthTotals.map(m => m[1]), borderColor: palette[1], fill: false }] },
+  options: { plugins: { legend: { display: false } } }
+});
+{% endif %}
+{% endblock %}
